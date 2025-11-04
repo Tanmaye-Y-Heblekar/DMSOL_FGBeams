@@ -1,0 +1,13 @@
+# Author: Tanmaye Yashodan Heblekar
+# Ignore the following folders
+DOCUMENTS/
+gmsh/
+FUNCTIONS/YAML_MATLAB_0.4.3/
+
+# Ignore mesh images
+*.png
+*.pdf
+*.pptx
+
+# Ignore temp files
+*.asv
