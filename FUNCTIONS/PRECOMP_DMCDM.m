@@ -4,7 +4,7 @@
 % AUTHOR: TANMAYE YASHODAN HEBLEKAR
 % DATE: 4 NOVEMBER 2025
 
-function [INTERFACE,CDOMAIN] = PRECOMP_DMCDM(P,NGP,GFILE)
+function [INTERFACE,CDOMAIN,HMAT] = PRECOMP_DMCDM(P,NGP,GFILE)
     NPE = P+1; % NODES PER ELEMENT
     % NOTE: BELOW WE ASSUME EVENLY SPACED NODES
     XIS = linspace(-1,1,NPE); % PARENT ELEMENT NODE LOCATIONS
@@ -64,4 +64,15 @@ function [INTERFACE,CDOMAIN] = PRECOMP_DMCDM(P,NGP,GFILE)
             CDOMAIN.DSFL_ARRAY(:,J,K) = DSFL;
         end
     end
+
+    % GENERATE THE H-MATRIX
+    HMAT = zeros(NPE,P);
+    HMAT(1,1)=+1;
+    HMAT(end,end)=-1;
+    K = 1;
+    for I = 2:NPE-1
+        HMAT(I,K:K+1) = [-1,+1];
+        K = K + 1;
+    end
+    
 end

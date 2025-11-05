@@ -58,7 +58,7 @@ else
     NLS     = 1;
 end
 
-LAMBDA = linspace(1e-3,1,NLS);
+% WE WILL USE EVENLY SPACED NODES
 MODE = 0;
 
 % --------------------------------------------------
@@ -69,7 +69,8 @@ if(strcmp(METHOD, 'FEM'))
     return;
 else
     NGP  = INP_YAML.NGP;
-    [INTERFACE,CDOMAIN] = PRECOMP_DMCDM(P,NGP,GFILE);  
+    [INTERFACE,CDOMAIN,HMAT] = ...
+        PRECOMP_DMCDM(P,NGP,GFILE);  
 end
 % ..................................................
 
