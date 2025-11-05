@@ -65,20 +65,11 @@ MODE = 0;
 % PRECOMPUTE SFL AND DSFL AT ALL INTEGRATION POINTS
 % --------------------------------------------------
 if(strcmp(METHOD, 'FEM'))
-    NGP  = INP_YAML.NGPF;
-    NGP2 = NGP*NGP;
-    [IPTS,WBAR,ISFL,IDSFL] = ...
-    PRECOMPSHAPE_FEM(GFILE,NGP,P,MODE);
+    disp("WORK IN PROGRESS! EXITING PROGRAM.");
+    return;
 else
-    NGP_PATH  = INP_YAML.NGP_PATH;
-    NGP_PATCH = INP_YAML.NGP_PATCH;
-    [MASTER_NODES,...
-     H_VERT, H_HORI,...
-     PATHS_VERT,PATHS_HORI,N_PATHS,...
-     PATCHES] = PRECOMPSHAPE_DMCDM(GFILE, ...
-                                   NGP_PATH, ...
-                                   NGP_PATCH, ...
-                                   P,MODE);   
+    NGP  = INP_YAML.NGP;
+    [INTERFACE,CDOMAIN] = PRECOMP_DMCDM(P,NGP,GFILE);  
 end
 % ..................................................
 
@@ -300,9 +291,6 @@ for NL = 1:NLS
                 disp('STATUS: STEP CONVERGED')
                 disp(['ITERATIONS = ',num2str(ITER)]);
                 CONVG = true;
-                WHIST(NL,1) = LOAD;
-                GW = GCU(3:5:end);
-                WHIST(NL,2) = full(GW(54-1));
                 break;
             end
         end
