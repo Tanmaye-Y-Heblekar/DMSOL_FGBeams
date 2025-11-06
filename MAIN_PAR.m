@@ -25,20 +25,13 @@ load([DIR MSHFILE]);                % LOAD SELECTED MESH FILE
 disp('MSH. FILE LOAD >> COMPLETE');
 
 % PLATE STIFFNESS VALUES
-FLD.A11 = INP_YAML.A11;
-FLD.A22 = INP_YAML.A22;
-FLD.A12 = INP_YAML.A12;
-FLD.A44 = INP_YAML.A44;
-FLD.A55 = INP_YAML.A55;
-FLD.A66 = INP_YAML.A66;
-FLD.D11 = INP_YAML.D11;
-FLD.D22 = INP_YAML.D22;
-FLD.D12 = INP_YAML.D12;
-FLD.D66 = INP_YAML.D66; 
+FLD.AXX = INP_YAML.AXX;
+FLD.BXX = INP_YAML.BXX;
+FLD.DXX = INP_YAML.DXX;
+FLD.SXX = INP_YAML.SXX;
 
 % DISTRIBUTED LOADS
 FLD.FX = INP_YAML.FX;
-FLD.FY = INP_YAML.FY;
 FLD.QZ = INP_YAML.QZ;
 
 NDF     = 5;                % DEGREES OF FREEDOM PER NODE
@@ -174,13 +167,9 @@ for NL = 1:NLS
             end
            
             % CALCULATE ELEMENT STIFFNESS AND FORCE COEFFICIENTS.
-            [ELK, ELF] = ESUB_DMCDM_PLATE(FLD, ELXY, ...
-                                          H_VERT, H_HORI,...
-                                          PATHS_VERT,PATHS_HORI, ...
-                                          PATCHES,...
-                                          N_PATHS,NPE,...
-                                          NGP_PATH,NGP_PATCH,...
-                                          NONLIN,ELEMSOL,...
+            [ELK, ELF] = ESUB_DMCDM_PLATE(FLD, ELXY, HMAT,...
+                                          INTERFACE,CDOMAIN,NPE,...
+                                          NGP,NONLIN,ELEMSOL,...
                                           LOAD);
             
        
