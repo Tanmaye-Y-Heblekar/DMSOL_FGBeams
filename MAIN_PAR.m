@@ -12,7 +12,6 @@ clear;clc;
 
 DIR     = 'PROB_01\';
 INPFILE = 'INP_FILE.yaml';
-MSHFILE = 'MESH_P8\MESH_OBJECT.mat';
 GFILE   = 'GAUSS.g';
 
 % =========================================================================
@@ -21,10 +20,8 @@ GFILE   = 'GAUSS.g';
 
 INP_YAML = ReadYaml([DIR INPFILE]); % READ INPUT FILE
 disp('INP. FILE READ >> COMPLETE');
-load([DIR MSHFILE]);                % LOAD SELECTED MESH FILE
-disp('MSH. FILE LOAD >> COMPLETE');
 
-% PLATE STIFFNESS VALUES
+% BEAM STIFFNESS VALUES
 FLD.AXX = INP_YAML.AXX;
 FLD.BXX = INP_YAML.BXX;
 FLD.DXX = INP_YAML.DXX;
@@ -34,7 +31,25 @@ FLD.SXX = INP_YAML.SXX;
 FLD.FX = INP_YAML.FX;
 FLD.QZ = INP_YAML.QZ;
 
-NDF     = 5;                % DEGREES OF FREEDOM PER NODE
+% MESH INFORMATION
+NEM = INP_YAML.NEM;
+P   = INP_YAML.P;
+X0  = INP_YAML.X0;
+L   = INP_YAML.L;
+
+% GENERATE 1D MESH
+[GLX,NOD,NNM,NPE] = MESH1D(X0,L,NEM,P);
+disp('1D MESH GENERATION >> COMPLETE');
+
+% READ ESSENTIAL BOUNDARY CONDITIONS
+TEMP = INP_YAML.EBCS.NODES;
+TEMP = regexprep(TEMP, 'F\(NNM\)', '@(NNM)');
+FHANDLE = str2func(TEMP);
+EBC_TABLE(:,1) = FHANDLE(NNM)';
+EBC_TABLE(:,2) = (cell2mat(INP_YAML.EBCS.DOFS))';
+EBC_TABLE(:,3) = (cell2mat(INP_YAML.EBCS.VALS))';
+
+NDF     = 3;                % DEGREES OF FREEDOM PER NODE
 NEQ     = NNM*NDF;          % NUMBER OF GLOBAL EQUATIONS
 NET     = NPE*NDF;          % EQUATION PER ELEMENT
 METHOD  = INP_YAML.METHOD;  % SPATIAL DISCRETIZATION METHOD
@@ -144,12 +159,12 @@ for NL = 1:NLS
         V_FORCE_CELL = cell(NEM,1); % VAL (FOR GLF)
 
         % ELEMENT CALCULATIONS AND ASSEMBLY
-        parfor N=1:NEM
+        for N=1:NEM
             % ELEMENT NODES
             NI = NOD(N,:);
             
             % EXTRACT ELXY FROM GLXY
-            ELXY = GLXY(NI,:);
+            ELX = GLX(NI);
     
             % LOCAL-TO-GLOBAL DOF MAP
             S = 1;
@@ -167,10 +182,10 @@ for NL = 1:NLS
             end
            
             % CALCULATE ELEMENT STIFFNESS AND FORCE COEFFICIENTS.
-            [ELK, ELF] = ESUB_DMCDM_PLATE(FLD, ELXY, HMAT,...
-                                          INTERFACE,CDOMAIN,NPE,...
-                                          NGP,NONLIN,ELEMSOL,...
-                                          LOAD);
+            [ELK, ELF] = ESUB_DMCDM_BEAM(FLD, ELX, HMAT,...
+                                         INTERFACE,CDOMAIN,NPE,...
+                                         NGP,NONLIN,ELEMSOL,...
+                                         LOAD);
             
        
             % STORAGE FOR THIS ELEMENT

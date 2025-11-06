@@ -4,29 +4,43 @@
 % AUTHOR: TANMAYE YASHODAN HEBLEKAR
 % DATE: 5 NOVEMBER 2025
 
-function [ELK,ELF] = ESUB_DMCDM(FLD, ELXY, HMAT,...
-                                INTERFACE,CDOMAIN,NPE,...
-                                NGP,NONLIN,ELEMSOL,...
-                                LOAD)
+function [ELK,ELF] = ESUB_DMCDM_BEAM(FLD, ELXY, HMAT,...
+                                     INTERFACE,CDOMAIN,NPE,...
+                                     NGP,NONLIN,ELEMSOL,...
+                                     LOAD)
+    % INITIALIZE ELEMENT ARRAYS
+    NDF = 3; % NUMBER OF DOFS PER NODE
+    NET = NPE*NDF; % NUMBER OF ELEMENT EQUATIONS
+    ELK = zeros(NET,NET); % ELEMENT STIFFNESS MATRIX
+    ELF = zeros(NET,1); % ELEMENT FORCE VECTOR
+
+    % EXTRACT BEAM STIFFNESS VALUES
+    AXX = FLD.AXX;
+    BXX = FLD.BXX;
+    DXX = FLD.DXX;
+    SXX = FLD.SXX;
+
+    % EXTRACT LOADS
+    FX = FLD.FX; % DISTRIBUTED AXIAL FORCE
+    QZ = FLD.QZ; % DISTRIBUTED TRANSVERSE FORCE
+
+    % ELEMENT SOLUTION
     ELU = ELEMSOL(1:3:end);
     ELW = ELEMSOL(2:3:end);
     ELS = ELEMSOL(3:3:end);
 
     P = NPE - 1; % ELEMENT ORDER
+    
     % COMPUTE COEFFICIENTS AT CD INTERFACES
     ZEROS_P_NPE = zeros(P,NPE);
-    R11 = ZEROS_P_NPE;
-    R12 = ZEROS_P_NPE;
-    R13 = ZEROS_P_NPE;
-    R21 = ZEROS_P_NPE;
-    R22 = ZEROS_P_NPE;
-    R23 = ZEROS_P_NPE;
-    R31 = ZEROS_P_NPE;
-    R32 = ZEROS_P_NPE;
-    R33 = ZEROS_P_NPE;
-
+    R11 = ZEROS_P_NPE; R21 = ZEROS_P_NPE; R31 = ZEROS_P_NPE; 
+    R12 = ZEROS_P_NPE; R22 = ZEROS_P_NPE; R32 = ZEROS_P_NPE;
+    R13 = ZEROS_P_NPE; R23 = ZEROS_P_NPE; R33 = ZEROS_P_NPE;
+    
+    % FETCH PRECOMPUTED SHAPE FUNCTION DATA AT INTERFACES
     SFL_ARRAY = INTERFACE.SFL_ARRAY;
     DSFL_ARRAY = INTERFACE.DSFL_ARRAY;
+    
     % LOOP OVER INTERFACES
     for I=1:P
         SFL = SFL_ARRAY(:,I);
@@ -46,13 +60,14 @@ function [ELK,ELF] = ESUB_DMCDM(FLD, ELXY, HMAT,...
         R32(I,:) = (BXX*DW)/2*GDSFL';
         R33(I,:) = DXX*GDSFL';
 
+        % COMPUTE TANGENT COEFFICIENTS
         if(NONLIN>1)
             DU = dot(GDSFL,ELU);
             DS = dot(GDSFL,ELS);
         end
     end
 
-    % DOMAIN INTEGRATION FOR 32 & 33 TERMS
+    % DOMAIN INTEGRATION FOR 32 & 33 AND FORCE TERMS
     ELK32 = zeros(NPE,NPE);
     ELK33 = zeros(NPE,NPE);
     ELF1  = zeros(NPE,1);
@@ -78,6 +93,21 @@ function [ELK,ELF] = ESUB_DMCDM(FLD, ELXY, HMAT,...
             ELF2(I) = ELF2(I) + QZ*CNST*LOAD;
         end
     end
-
     
+    % FORM THE ELEMENT STIFFNESS MATRIX
+    ELK(1:NDF:end,1:NDF:end) = HMAT*R11;
+    ELK(1:NDF:end,2:NDF:end) = HMAT*R12;
+    ELK(1:NDF:end,3:NDF:end) = HMAT*R13;
+    ELK(2:NDF:end,1:NDF:end) = HMAT*R21;
+    ELK(2:NDF:end,2:NDF:end) = HMAT*R22;
+    ELK(2:NDF:end,3:NDF:end) = HMAT*R23;
+    ELK(3:NDF:end,1:NDF:end) = HMAT*R31;
+    ELK(3:NDF:end,2:NDF:end) = HMAT*R32 + ELK32;
+    ELK(3:NDF:end,3:NDF:end) = HMAT*R33 + ELK33;
+
+    % FORM THE ELEMENT FORCE VECTOR
+    ELF(1:NDF:end) = ELF1;
+    ELF(2:NDF:end) = ELF2;
+    ELF(3:NDF:end) = ELF3;
+
 end
