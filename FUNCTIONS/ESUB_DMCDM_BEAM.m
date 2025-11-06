@@ -108,6 +108,5 @@ function [ELK,ELF] = ESUB_DMCDM_BEAM(FLD, ELXY, HMAT,...
     % FORM THE ELEMENT FORCE VECTOR
     ELF(1:NDF:end) = ELF1;
     ELF(2:NDF:end) = ELF2;
-    ELF(3:NDF:end) = ELF3;
-
+   
 end
