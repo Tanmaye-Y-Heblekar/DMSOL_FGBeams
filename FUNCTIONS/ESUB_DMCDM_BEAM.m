@@ -4,7 +4,7 @@
 % AUTHOR: TANMAYE YASHODAN HEBLEKAR
 % DATE: 5 NOVEMBER 2025
 
-function [ELK,ELF] = ESUB_DMCDM_BEAM(FLD, ELXY, HMAT,...
+function [ELK,ELF] = ESUB_DMCDM_BEAM(FLD, ELX, HMAT,...
                                      INTERFACE,CDOMAIN,NPE,...
                                      NGP,NONLIN,ELEMSOL,...
                                      LOAD)
@@ -36,6 +36,12 @@ function [ELK,ELF] = ESUB_DMCDM_BEAM(FLD, ELXY, HMAT,...
     R11 = ZEROS_P_NPE; R21 = ZEROS_P_NPE; R31 = ZEROS_P_NPE; 
     R12 = ZEROS_P_NPE; R22 = ZEROS_P_NPE; R32 = ZEROS_P_NPE;
     R13 = ZEROS_P_NPE; R23 = ZEROS_P_NPE; R33 = ZEROS_P_NPE;
+
+    if(NONLIN>1)
+        RT12 = ZEROS_P_NPE;
+        RT22 = ZEROS_P_NPE;
+        RT32 = ZEROS_P_NPE;
+    end
     
     % FETCH PRECOMPUTED SHAPE FUNCTION DATA AT INTERFACES
     SFL_ARRAY = INTERFACE.SFL_ARRAY;
@@ -45,7 +51,7 @@ function [ELK,ELF] = ESUB_DMCDM_BEAM(FLD, ELXY, HMAT,...
     for I=1:P
         SFL = SFL_ARRAY(:,I);
         DSFL = DSFL_ARRAY(:,I);
-        J = dot(ELXY,DSFL);
+        J = dot(ELX,DSFL);
         GDSFL = DSFL/J;
 
         DW = dot(GDSFL,ELW);
@@ -64,6 +70,9 @@ function [ELK,ELF] = ESUB_DMCDM_BEAM(FLD, ELXY, HMAT,...
         if(NONLIN>1)
             DU = dot(GDSFL,ELU);
             DS = dot(GDSFL,ELS);
+            RT12(I,:) = AXX*DW/2*GDSFL';
+            RT22(I,:) = (AXX*(DU+DW^2)+BXX*DS)*GDSFL';
+            RT32(I,:) = BXX*DW/2*GDSFL';
         end
     end
 
@@ -82,7 +91,7 @@ function [ELK,ELF] = ESUB_DMCDM_BEAM(FLD, ELXY, HMAT,...
         for NG = 1:NGP
             SFL  = CDOMAIN.SFL_ARRAY(:,NG,I);
             DSFL = CDOMAIN.DSFL_ARRAY(:,NG,I);
-            J = dot(ELXY,DSFL);
+            J = dot(ELX,DSFL);
             GDSFL = DSFL/J;
             CNST = J*GWTS(NG);
 
@@ -105,8 +114,25 @@ function [ELK,ELF] = ESUB_DMCDM_BEAM(FLD, ELXY, HMAT,...
     ELK(3:NDF:end,2:NDF:end) = HMAT*R32 + ELK32;
     ELK(3:NDF:end,3:NDF:end) = HMAT*R33 + ELK33;
 
+    % PART OF TANGENT COEFFICIENTS THAT ADD 
+    % TO THE STIFFNESS COEFFICIENTS
+    if(NONLIN>1)
+        TAN12 = HMAT*RT12;
+        TAN22 = HMAT*RT22;
+        TAN32 = HMAT*RT32;
+    end
+
     % FORM THE ELEMENT FORCE VECTOR
     ELF(1:NDF:end) = ELF1;
     ELF(2:NDF:end) = ELF2;
    
+    % FOR NEWTON'S METHOD
+    if(NONLIN>1)
+        % ELEMENT RESIDUAL VECTOR
+        ELF = ELF - ELK*ELEMSOL;
+        % ELEMENT TANGENT MATRIX
+        ELK(1:NDF:end,2:NDF:end) = ELK(1:NDF:end,2:NDF:end) + TAN12;
+        ELK(2:NDF:end,2:NDF:end) = ELK(2:NDF:end,2:NDF:end) + TAN22;
+        ELK(3:NDF:end,2:NDF:end) = ELK(3:NDF:end,2:NDF:end) + TAN32;
+    end
 end

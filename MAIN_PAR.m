@@ -10,8 +10,8 @@
 % CLEAR COMMAND WINDOW AND WORKSPACE
 clear;clc;
 
-DIR     = 'PROB_01\';
-INPFILE = 'INP_FILE.yaml';
+DIR     = 'PROB_02_NL\';
+INPFILE = 'INP_FILE_P5_3_2.yaml';
 GFILE   = 'GAUSS.g';
 
 % =========================================================================
@@ -296,6 +296,7 @@ for NL = 1:NLS
                 disp('STATUS: STEP CONVERGED')
                 disp(['ITERATIONS = ',num2str(ITER)]);
                 CONVG = true;
+                disp(full(GCU(end-1)));
                 break;
             end
         end

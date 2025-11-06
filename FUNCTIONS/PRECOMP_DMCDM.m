@@ -58,7 +58,7 @@ function [INTERFACE,CDOMAIN,HMAT] = PRECOMP_DMCDM(P,NGP,GFILE)
         
         % LOOP OVER GAUSS POINTS
         for J = 1:NGP
-            XI = CDOMAIN.GPTS(J);
+            XI = CDOMAIN.GPTS(J,K);
             [SFL,DSFL] = SHAPE1D(XI,P,XIS);
             CDOMAIN.SFL_ARRAY(:,J,K) = SFL;
             CDOMAIN.DSFL_ARRAY(:,J,K) = DSFL;
