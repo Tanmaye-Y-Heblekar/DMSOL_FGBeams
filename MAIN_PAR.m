@@ -10,8 +10,8 @@
 % CLEAR COMMAND WINDOW AND WORKSPACE
 clear;clc;
 
-DIR     = 'PROB_02_NL\';
-INPFILE = 'INP_FILE_P5_3_2.yaml';
+DIR     = 'PROB_04_NL_FGB\';
+INPFILE = 'INP_FILE_P5_3_4.yaml';
 GFILE   = 'GAUSS.g';
 
 % =========================================================================
@@ -296,11 +296,12 @@ for NL = 1:NLS
                 disp('STATUS: STEP CONVERGED')
                 disp(['ITERATIONS = ',num2str(ITER)]);
                 CONVG = true;
-                disp(full(GCU(end-1)));
+                
+                % ADD BOOKKEEPING/RECORDING LINES (IF ANY) BELOW
+                
                 break;
             end
         end
-        disp(strcat("ITER ",num2str(ITER)));
     
     end
     if(~CONVG && NONLIN>0)
