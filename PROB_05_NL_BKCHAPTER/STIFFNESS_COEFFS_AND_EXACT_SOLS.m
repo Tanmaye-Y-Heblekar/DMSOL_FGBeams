@@ -11,7 +11,7 @@ E2 = 10e+06;
 NU = 0.3;
 KS = 5/6;
 q0 = 1;
-n  = 50;
+n  = 10;
 
 A0 = b*h;
 B0 = b*h^2;
@@ -38,7 +38,7 @@ w_exact = @(xi) AXX/DXXSTR*q0*L^4/24*(xi^2-2*xi^3+xi^4) + ...
                1/SXX*q0*L^2/2*(xi-xi^2);
 
 disp("Exact vertical displacement @ center");
-disp(w_exact(0.5));
+fprintf('%.6f\n', w_exact(0.5));
 disp("DMCDM vertical displacement @ center");
-w_dmcdm = GCU(end-1);
-disp(w_dmcdm);
+w_dmcdm = full(GCU(end-1));
+fprintf('%.6f\n', w_dmcdm);

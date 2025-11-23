@@ -10,8 +10,8 @@
 % CLEAR COMMAND WINDOW AND WORKSPACE
 clear;clc;
 
-DIR     = 'PROB_04_NL_FGB\';
-INPFILE = 'INP_FILE_P5_3_4.yaml';
+DIR     = 'PROB_05_NL_BKCHAPTER\';
+INPFILE = 'INP_FILE_FGB.yaml';
 GFILE   = 'GAUSS.g';
 
 % =========================================================================
@@ -298,7 +298,10 @@ for NL = 1:NLS
                 CONVG = true;
                 
                 % ADD BOOKKEEPING/RECORDING LINES (IF ANY) BELOW
-                
+                WHIST(NL,1) = LOAD;
+                WHIST(NL,2) = -full(GCU(end-1));
+                % END EXTRA LINES
+
                 break;
             end
         end
