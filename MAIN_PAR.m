@@ -10,8 +10,8 @@
 % CLEAR COMMAND WINDOW AND WORKSPACE
 clear;clc;
 
-DIR     = 'PROB_05_NL_BKCHAPTER\';
-INPFILE = 'INP_FILE_FGB.yaml';
+DIR     = 'PROB_06_IEEE_CiSE_Nonlinear\';
+INPFILE = 'INP_FILE.yaml';
 GFILE   = 'GAUSS.g';
 
 % =========================================================================
